@@ -15,11 +15,6 @@ lint:
 fmt:
 	ruff format app tests
 
-coverage:
-    .venv\Scripts\coverage run -m pytest
-    .venv\Scripts\coverage report
-    .venv\Scripts\coverage xml
-
 compose-up:
 	docker compose -f docker/docker-compose.yml up -d
 
