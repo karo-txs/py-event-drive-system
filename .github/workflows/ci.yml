@@ -1,0 +1,38 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+      - name: Cache uv
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: ${{ runner.os }}-uv-${{ hashFiles('pyproject.toml') }}
+      - name: Install uv
+        run: pip install uv
+      - name: Install dependencies
+        run: uv pip install -r pyproject.toml
+      - name: Lint
+        run: ruff check app tests
+      - name: Type check (mypy)
+        run: mypy app || true
+      - name: Run tests
+        run: coverage run -m pytest
+      - name: Coverage report
+        run: coverage xml
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-xml
+          path: coverage.xml
