@@ -5,6 +5,7 @@ from app.infrastructure.providers import (
 )
 from app.application.dtos import ProcessEventInput, ProcessEventOutput
 from app.application.use_cases.process_event import ProcessEvent
+from fastapi.responses import JSONResponse
 from app.config.settings import Settings
 from pydantic import BaseModel
 from fastapi import APIRouter
@@ -31,11 +32,11 @@ async def process(payload: ProcessPayload):
     api = provide_external_api(settings)
     use_case = ProcessEvent(repo, bus, api)
     dto = ProcessEventInput(payload.model_dump())
-    # try:
-    result = await use_case.execute(dto)
-    return result
-    # except Exception as exc:
-    #     return JSONResponse(
-    #         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-    #         content={"error": f"Erro ao processar evento: {exc}"},
-    #     )
+    try:
+        result = await use_case.execute(dto)
+        return result
+    except Exception as exc:
+        return JSONResponse(
+            status_code=500,
+            content={"error": f"Erro ao processar evento: {exc}"},
+        )
